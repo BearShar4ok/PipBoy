@@ -1,0 +1,30 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="480"
+		Width="800" Height="480"
+        x:Class="Ava.MapWindow" 
+        Title="MapWindow">
+	<Window.Resources>
+		<ScaleTransform x:Key="MapScaleTransform" ScaleX="1" ScaleY="1"/>
+	</Window.Resources>
+	<StackPanel>
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+			<Button Name="ZoomInButton" Content="+" Width="50" Height="30" Click="ZoomInButton_Click"/>
+			<Button Name="ZoomOutButton" Content="-" Width="50" Height="30" Click="ZoomOutButton_Click"/>
+			<Label Name="info" Content="ttt" BorderThickness="1" BorderBrush="Black" />
+			<Label Name="infoB1" Content="1 no" BorderThickness="1" BorderBrush="Black" />
+			<Label Name="infoB2" Content="2 no" BorderThickness="1" BorderBrush="Black" />
+		</StackPanel>
+		<Canvas Name="MapCanvas">
+			<Image Name="MapImage"
+                   RenderTransform="{StaticResource MapScaleTransform}"
+                   RenderTransformOrigin="0.5,0.5"/>
+		</Canvas>
+
+		<!-- Кнопки управления зумом -->
+		<!-- mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="480" -->
+
+	</StackPanel>
+</Window>

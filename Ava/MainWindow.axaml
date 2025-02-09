@@ -1,0 +1,27 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Ava.MainWindow"
+        Title="Hello Avalonia!"
+		Width="800" Height="480">
+	<Window.Resources>
+		<ScaleTransform x:Key="MapScaleTransform" ScaleX="1" ScaleY="1"/>
+	</Window.Resources>
+
+	<StackPanel>
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+			<Button Name="ZoomInButton" Content="+" Width="50" Height="30" Click="ZoomInButton_Click"/>
+			<Button Name="ZoomOutButton" Content="-" Width="50" Height="30" Click="ZoomOutButton_Click"/>
+			<Label Name="info" Content="ttt" BorderThickness="1" BorderBrush="Black" />
+			<Label Name="infoB1" Content="1 no" BorderThickness="1" BorderBrush="Black" />
+			<Label Name="infoB2" Content="2 no" BorderThickness="1" BorderBrush="Black" />
+		</StackPanel>
+		<ContentControl x:Name="FrameHost"/>
+		<Canvas Name="MapCanvas">
+			<Image Name="MapImage" 
+                   RenderTransform="{StaticResource MapScaleTransform}"
+                   RenderTransformOrigin="0.5,0.5"/>
+		</Canvas>
+		<!-- Кнопки управления зумом -->
+		
+	</StackPanel>
+</Window>
