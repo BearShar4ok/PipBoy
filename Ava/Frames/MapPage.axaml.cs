@@ -29,14 +29,7 @@ public partial class MapPage : UserControl
 
         // Проверяем, работает ли Avalonia Previewer
 
-
-
-        //  string imagePath = "avares://Ava/Assets/map.jpg";  // Путь к ресурсу
-        //string imagePath = "avares://Ava/Assets/map.jpg";  // Путь к ресурсу
-        //MapImage.Source = new Bitmap(imagePath);
-
         string exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        //Console.WriteLine(exePath);
 
         string imagePath = Path.Combine(exeDir, "Assets", "map.jpg");
         if (File.Exists(imagePath))
@@ -49,22 +42,6 @@ public partial class MapPage : UserControl
             info.Content = "No " + imagePath;
         }
 
-
-
-
-
-        //if (File.Exists(imagePath))
-        //{
-        //    MapImage.Source = new Bitmap(imagePath);
-        //    info.Content = "YES " + imagePath;
-        //    MapCanvas.Width = MapImage.Width;
-        //    MapCanvas.Height = MapImage.Height;
-        //}
-        //else
-        //{
-        //    info.Content = "No " + imagePath;
-        //    Debug.WriteLine("Изображение не найдено: " + imagePath);
-        //}
 
         _scaleTransform = this.Resources["MapScaleTransform"] as ScaleTransform;
         if (Design.IsDesignMode)
