@@ -6,15 +6,22 @@ namespace Ava;
 
 public partial class FirstPage : UserControl
 {
-    public FirstPage()
+    public FirstPage(string text)
     {
         InitializeComponent();
+        button.Content = text;
     }
     private void GoToSecondPage(object sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (this.Parent is ContentControl frame)
+        var parent = this.Parent;
+        while (parent is not ContentControl && parent is not null)
         {
-            frame.Content = new SecondPage();
+            parent = (parent as Control)?.Parent;
+        }
+
+        if (parent is ContentControl frame)
+        {
+            frame.Content = new FirstPage("new one");
         }
     }
 }

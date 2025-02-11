@@ -4,8 +4,6 @@ using Microsoft.VisualBasic;
 
 
 using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Media.Imaging;
 using System;
 using System.Device.Gpio;
 using System.Threading;
@@ -15,6 +13,8 @@ using System.IO;
 using System.Diagnostics;
 using Tmds.DBus.Protocol;
 using Avalonia.Threading;
+using System.Threading.Tasks;
+using Ava.Classes;
 
 
 
@@ -25,8 +25,11 @@ namespace Ava
         private double _zoomFactor = 1.0;
         private ScaleTransform _scaleTransform;
 
-        //GpioController controller = new GpioController();
+        private GpioController? controller = null;
+        private Control currentPage;
 
+        private Control[] pages = new Control[] { new FirstPage("1"), new FirstPage("2"),new MapPage(), new FirstPage("3"), new FirstPage("4"), new FirstPage("5") };
+        int pageIndex = 0;
 
         int buttonPinY = 21; // GPIO 21
         int buttonPinG = 19; // GPIO 19
@@ -36,117 +39,66 @@ namespace Ava
         {
             InitializeComponent();
 
-            
-
-            FrameHost.Content = new FirstPage(); // Загружаем стартовую страницу
-            //MapWindow mw = new MapWindow();
-            //mw.Show();
-
-            //string imagePath = Path.Combine(Directory.GetCurrentDirectory(), "Downloads/publish/map.png");//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //
-            //
-            //// Убедитесь, что файл существует
-            //if (File.Exists(imagePath))
-            //{
-            //    MapImage.Source = new Bitmap(imagePath);
-            //    info.Content = imagePath;
-            //}
-            //else
-            //{
-            //    info.Content = "No   " + imagePath;
-            //    Debug.WriteLine("Изображение не найдено: " + imagePath);
-            //}
-            //// Получаем ScaleTransform из ресурсов
-            //_scaleTransform = this.Resources["MapScaleTransform"] as ScaleTransform;
-            //TEST_GPIO();
-        }
-        private void TEST_GPIO()
-        {
-
-            //controller.Write(ledPinY, PinValue.Low);
-            //controller.Write(ledPinG, PinValue.Low);
-
-            /*
-            controller.OpenPin(buttonPinY, PinMode.InputPullUp);
-                        //controller.OpenPin(ledPinY, PinMode.Output);
-            
-            controller.RegisterCallbackForPinValueChangedEvent(buttonPinY,
-                PinEventTypes.Falling, ButtonPressedPlus);
-            controller.RegisterCallbackForPinValueChangedEvent(buttonPinY,
-                PinEventTypes.Rising, ButtonRealesdPlus);
-            
-            
-            
-            
-            
-            controller.OpenPin(buttonPinG, PinMode.InputPullUp);
-                        //controller.OpenPin(ledPinG, PinMode.Output);
-            
-            controller.RegisterCallbackForPinValueChangedEvent(buttonPinG,
-                PinEventTypes.Falling, ButtonPressedMinus);
-            controller.RegisterCallbackForPinValueChangedEvent(buttonPinG,
-                PinEventTypes.Rising, ButtonRealesdMinus);
-            */
-        }
-        private void ButtonPressedPlus(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
-        {
-            Dispatcher.UIThread.Post(() =>
+            // Проверяем, работает ли Avalonia Previewer
+            if (Design.IsDesignMode)
             {
-                infoB1.Content = "1 work";
-                if (_zoomFactor >= 2)
-                    return;
-                ChangeZoom(0.1); // Увеличиваем зум на 10%
-                infoB1.Content = "1 pressed";
-            });
-        }
-
-        private void ButtonRealesdPlus(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
-        {
-            
-            Dispatcher.UIThread.Post(() =>
-            {
-                infoB1.Content = "1 released";
-            });
-        }
-
-        private void ButtonPressedMinus(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
-        {
-            Dispatcher.UIThread.Post(() =>
-            {
-                infoB2.Content = "2 work";
-                if (_zoomFactor <= 1)
-                    return;
-                ChangeZoom(-0.1); // Уменьшаем зум на 10%
-                infoB2.Content = "2 pressed";
-            });
-        }
-        private void ButtonRealesdMinus(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
-        {
-            Dispatcher.UIThread.Post(() =>
-            {
-                infoB2.Content = "2 released";
-            });
-        }
-
-        private void ZoomInButton_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)
-        {
-            if (_zoomFactor >= 2)
+                label.Content = "Design mode (Previewer)";
                 return;
-            ChangeZoom(0.1); // Увеличиваем зум на 10%
+            }
+
+            try
+            {
+                controller = new GpioController();
+                Task.Run(MonitorButtons);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Ошибка инициализации GPIO: " + ex.Message);
+            }
+
+            currentPage = pages[0]; // Загружаем стартовую страницу
+            FrameHost.Content = currentPage;
+        }
+        private void MonitorButtons()
+        {
+            controller.OpenPin(RasberryPINS.buttonPinB, PinMode.InputPullUp);
+            controller.OpenPin(RasberryPINS.buttonPinO, PinMode.InputPullUp);
+
+            while (true)
+            {
+                if (controller.Read(RasberryPINS.buttonPinO) == PinValue.Low)
+                {
+                    SwitchPage(true);
+                    Thread.Sleep(500); // Антидребезг
+                }
+
+                if (controller.Read(RasberryPINS.buttonPinB) == PinValue.Low)
+                {
+                    SwitchPage(false);
+                    Thread.Sleep(500);
+                }
+
+                Thread.Sleep(50); // Снижаем нагрузку на процессор
+            }
         }
 
-        private void ZoomOutButton_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void SwitchPage(bool isUp)
         {
-            if (_zoomFactor <= 1)
-                return;
-            ChangeZoom(-0.1); // Уменьшаем зум на 10%
-        }
-
-        private void ChangeZoom(double zoomStep)
-        {
-            _zoomFactor = Math.Clamp(_zoomFactor + zoomStep, 0.5, 5); // Ограничиваем масштаб от 0.5 до 5
-            _scaleTransform.ScaleX = _zoomFactor;
-            _scaleTransform.ScaleY = _zoomFactor;
+            if (isUp&& pageIndex < pages.Length - 1)
+            {
+                    pageIndex++;
+            }
+            else if(!isUp && pageIndex > 0)
+            {
+                    pageIndex--;
+            }
+            
+            Dispatcher.UIThread.Post(() =>
+            {
+                label.Content = (pageIndex + 1) + "/" + pages.Length;
+                currentPage = pages[pageIndex];
+                FrameHost.Content = currentPage;
+            });
         }
     }
 }

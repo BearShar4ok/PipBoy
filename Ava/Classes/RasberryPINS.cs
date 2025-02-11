@@ -8,10 +8,10 @@ namespace Ava.Classes
 {
     internal static class RasberryPINS
     {
-        public const int buttonPinY = 21; // GPIO 21
-        public const int buttonPinG = 19; // GPIO 19
-        public const int ledPinY = 20; // GPIO 20
-        public const int ledPinG = 16; // GPIO 16
+        public const int buttonPinO = 21; // right switch
+        public const int buttonPinG = 16; // left switch
+        public const int buttonPinY = 20; // select -
+        public const int buttonPinB = 19; // select +
 
     }
 }

@@ -7,6 +7,7 @@
 		<Button Content="Go to Second Page"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Click="GoToSecondPage"/>
+                Click="GoToSecondPage"
+				Name="button"/>
 	</Grid>
 </UserControl>

@@ -1,63 +1,87 @@
+using Ava.Classes;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-
-using Avalonia.Controls;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Microsoft.VisualBasic;
-
-
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using System;
 using System.Device.Gpio;
-using System.Threading;
-using Avalonia.Input;
-using Avalonia.Media;
-using System.IO;
 using System.Diagnostics;
-using Tmds.DBus.Protocol;
-using Avalonia.Threading;
+using System.IO;
+
+using System;
+using System.Reflection;
+
+
 
 namespace Ava;
 
-public partial class MapWindow : Window
+public partial class MapPage : UserControl
 {
-   
     private double _zoomFactor = 1.0;
     private ScaleTransform _scaleTransform;
 
-    GpioController controller = new GpioController();
-
-
-    int buttonPinY = 21; // GPIO 21
-    int buttonPinG = 19; // GPIO 19
-    int ledPinY = 20; // GPIO 20
-    int ledPinG = 16; // GPIO 16
-    public MapWindow()
+    private GpioController? controller = null;
+    public MapPage()
     {
         InitializeComponent();
 
+        // Проверяем, работает ли Avalonia Previewer
 
 
-        string imagePath = Path.Combine(Directory.GetCurrentDirectory(), "Downloads/publish/map.png");//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        
-        
-        // Убедитесь, что файл существует
+
+        //  string imagePath = "avares://Ava/Assets/map.jpg";  // Путь к ресурсу
+        //string imagePath = "avares://Ava/Assets/map.jpg";  // Путь к ресурсу
+        //MapImage.Source = new Bitmap(imagePath);
+
+        string exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        //Console.WriteLine(exePath);
+
+        string imagePath = Path.Combine(exeDir, "Assets", "map.jpg");
         if (File.Exists(imagePath))
         {
             MapImage.Source = new Bitmap(imagePath);
-            info.Content = imagePath;
+            info.Content = "YES " + imagePath;
         }
         else
         {
-            info.Content = "No   " + imagePath;
-            Debug.WriteLine("Изображение не найдено: " + imagePath);
+            info.Content = "No " + imagePath;
         }
-        // Получаем ScaleTransform из ресурсов
+
+
+
+
+
+        //if (File.Exists(imagePath))
+        //{
+        //    MapImage.Source = new Bitmap(imagePath);
+        //    info.Content = "YES " + imagePath;
+        //    MapCanvas.Width = MapImage.Width;
+        //    MapCanvas.Height = MapImage.Height;
+        //}
+        //else
+        //{
+        //    info.Content = "No " + imagePath;
+        //    Debug.WriteLine("Изображение не найдено: " + imagePath);
+        //}
+
         _scaleTransform = this.Resources["MapScaleTransform"] as ScaleTransform;
-        TEST_GPIO();
+        if (Design.IsDesignMode)
+        {
+            info.Content = "Design mode (Previewer)" + imagePath;
+            return;
+        }
+        try
+        {
+            controller = new GpioController();
+            info.Content = "CONTROLLER    " + imagePath;
+            TEST_GPIO();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine("Ошибка инициализации GPIO: " + ex.Message);
+        }
     }
     private void TEST_GPIO()
     {
@@ -66,24 +90,24 @@ public partial class MapWindow : Window
         //controller.Write(ledPinG, PinValue.Low);
 
 
-        controller.OpenPin(buttonPinY, PinMode.InputPullUp);
+        controller.OpenPin(RasberryPINS.buttonPinY, PinMode.InputPullUp);
         //controller.OpenPin(ledPinY, PinMode.Output);
 
-        controller.RegisterCallbackForPinValueChangedEvent(buttonPinY,
+        controller.RegisterCallbackForPinValueChangedEvent(RasberryPINS.buttonPinY,
             PinEventTypes.Falling, ButtonPressedPlus);
-        controller.RegisterCallbackForPinValueChangedEvent(buttonPinY,
+        controller.RegisterCallbackForPinValueChangedEvent(RasberryPINS.buttonPinY,
             PinEventTypes.Rising, ButtonRealesdPlus);
 
 
 
 
 
-        controller.OpenPin(buttonPinG, PinMode.InputPullUp);
+        controller.OpenPin(RasberryPINS.buttonPinG, PinMode.InputPullUp);
         //controller.OpenPin(ledPinG, PinMode.Output);
 
-        controller.RegisterCallbackForPinValueChangedEvent(buttonPinG,
+        controller.RegisterCallbackForPinValueChangedEvent(RasberryPINS.buttonPinG,
             PinEventTypes.Falling, ButtonPressedMinus);
-        controller.RegisterCallbackForPinValueChangedEvent(buttonPinG,
+        controller.RegisterCallbackForPinValueChangedEvent(RasberryPINS.buttonPinG,
             PinEventTypes.Rising, ButtonRealesdMinus);
 
     }
@@ -127,19 +151,6 @@ public partial class MapWindow : Window
         });
     }
 
-    private void ZoomInButton_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        if (_zoomFactor >= 2)
-            return;
-        ChangeZoom(0.1); // Увеличиваем зум на 10%
-    }
-
-    private void ZoomOutButton_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        if (_zoomFactor <= 1)
-            return;
-        ChangeZoom(-0.1); // Уменьшаем зум на 10%
-    }
 
     private void ChangeZoom(double zoomStep)
     {
@@ -147,5 +158,4 @@ public partial class MapWindow : Window
         _scaleTransform.ScaleX = _zoomFactor;
         _scaleTransform.ScaleY = _zoomFactor;
     }
-
 }
