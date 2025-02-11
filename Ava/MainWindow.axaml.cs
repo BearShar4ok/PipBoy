@@ -15,6 +15,7 @@ using Tmds.DBus.Protocol;
 using Avalonia.Threading;
 using System.Threading.Tasks;
 using Ava.Classes;
+using Avalonia.Interactivity;
 
 
 
@@ -28,7 +29,7 @@ namespace Ava
         private GpioController? controller = null;
         private Control currentPage;
 
-        private Control[] pages = new Control[] { new FirstPage("1"), new FirstPage("2"),new MapPage(), new FirstPage("3"), new FirstPage("4"), new FirstPage("5") };
+        private Control[] pages = new Control[] { new FirstPage("1"), new Explorer(), new MapPage(), new FirstPage("3"), new FirstPage("4"), new FirstPage("5") };
         int pageIndex = 0;
 
         int buttonPinY = 21; // GPIO 21
@@ -84,21 +85,30 @@ namespace Ava
 
         private void SwitchPage(bool isUp)
         {
-            if (isUp&& pageIndex < pages.Length - 1)
+            if (isUp && pageIndex < pages.Length - 1)
             {
-                    pageIndex++;
+                pageIndex++;
             }
-            else if(!isUp && pageIndex > 0)
+            else if (!isUp && pageIndex > 0)
             {
-                    pageIndex--;
+                pageIndex--;
             }
-            
+
             Dispatcher.UIThread.Post(() =>
             {
                 label.Content = (pageIndex + 1) + "/" + pages.Length;
                 currentPage = pages[pageIndex];
                 FrameHost.Content = currentPage;
             });
+        }
+
+        public void Button1_Click(object source, RoutedEventArgs args)
+        {
+            SwitchPage(true);
+        }
+        public void Button2_Click(object source, RoutedEventArgs args)
+        {
+            SwitchPage(false);
         }
     }
 }

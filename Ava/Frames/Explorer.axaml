@@ -1,0 +1,35 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Ava.Explorer">
+	<StackPanel>
+
+		<Label Name="info" Content="ttt" BorderThickness="1" BorderBrush="Black" />
+		<Button Name="button1" Content="UP" Click="Button1_Click"/>
+		<Button Name="button2" Content="DOWN" Click="Button2_Click"/>
+		<Button Content="test"/>
+		<Button Content="test"/>
+		<Button Content="test"/>
+
+		
+
+		<ListBox Name="explorerLB" KeyboardNavigation.TabNavigation="Cycle"
+			 Background="Black" Margin="50" Foreground="Wheat"
+			 BorderThickness="0" BorderBrush="Transparent"
+		 ScrollViewer.VerticalScrollBarVisibility="Visible"
+		  ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<Border Margin="0,5" Background="AliceBlue" BorderBrush="Red" BorderThickness="2">
+						<TextBlock Text="{Binding}" Foreground="Blue"/>
+					</Border>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+			<!--  📂🖹🖻🖺🖾 🖼  G:/Coding/MyProjects/Terminal_XP/Terminal_XP/Assets/Themes/Fallout/folder.png -->
+		</ListBox>
+
+
+	</StackPanel>
+</UserControl>

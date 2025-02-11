@@ -22,7 +22,8 @@ public partial class MapPage : UserControl
     private double _zoomFactor = 1.0;
     private ScaleTransform _scaleTransform;
 
-    private GpioController? controller = null;
+    //private GpioController? controller = null;
+    private readonly GpioService gpioService;
     public MapPage()
     {
         InitializeComponent();
@@ -51,7 +52,13 @@ public partial class MapPage : UserControl
         }
         try
         {
-            controller = new GpioController();
+            gpioService = new GpioService();
+
+            gpioService.ButtonPressedPlus += ButtonPressedPlus;
+            gpioService.ButtonPressedMinus += ButtonPressedMinus;
+
+            gpioService.InitializeGpio();
+            // controller = new GpioController();
             info.Content = "CONTROLLER    " + imagePath;
             TEST_GPIO();
         }
@@ -62,7 +69,7 @@ public partial class MapPage : UserControl
     }
     private void TEST_GPIO()
     {
-
+        /*
         //controller.Write(ledPinY, PinValue.Low);
         //controller.Write(ledPinG, PinValue.Low);
 
@@ -86,9 +93,9 @@ public partial class MapPage : UserControl
             PinEventTypes.Falling, ButtonPressedMinus);
         controller.RegisterCallbackForPinValueChangedEvent(RasberryPINS.buttonPinG,
             PinEventTypes.Rising, ButtonRealesdMinus);
-
+        */
     }
-    private void ButtonPressedPlus(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
+    private void ButtonPressedPlus()
     {
         Dispatcher.UIThread.Post(() =>
         {
@@ -109,7 +116,7 @@ public partial class MapPage : UserControl
         });
     }
 
-    private void ButtonPressedMinus(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
+    private void ButtonPressedMinus()
     {
         Dispatcher.UIThread.Post(() =>
         {
