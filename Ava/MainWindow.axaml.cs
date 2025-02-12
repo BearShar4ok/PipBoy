@@ -27,6 +27,7 @@ namespace Ava
         private ScaleTransform _scaleTransform;
 
         private GpioController? controller = null;
+        private RotaryEncoder? encoder = null;
         private Control currentPage;
 
         private Control[] pages = new Control[] { new FirstPage("1"), new Explorer(), new MapPage(), new FirstPage("3"), new FirstPage("4"), new FirstPage("5") };
@@ -50,6 +51,25 @@ namespace Ava
             try
             {
                 controller = new GpioController();
+                encoder = new RotaryEncoder(13,6);
+
+                encoder.RotatedRight += (position) =>
+                {
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        infocode.Content = "Encoder state: "+ encoder.Position;
+                        SwitchPage(true);
+                    });
+                };
+                encoder.RotatedLeft += (position) =>
+                {
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        infocode.Content = "Encoder state: " + encoder.Position;
+                        SwitchPage(false);
+                    });
+                };
+
                 Task.Run(MonitorButtons);
             }
             catch (Exception ex)
@@ -60,6 +80,7 @@ namespace Ava
             currentPage = pages[0]; // Загружаем стартовую страницу
             FrameHost.Content = currentPage;
         }
+
         private void MonitorButtons()
         {
             controller.OpenPin(RasberryPINS.buttonPinB, PinMode.InputPullUp);

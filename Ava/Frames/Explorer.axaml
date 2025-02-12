@@ -9,17 +9,13 @@
 		<Label Name="info" Content="ttt" BorderThickness="1" BorderBrush="Black" />
 		<Button Name="button1" Content="UP" Click="Button1_Click"/>
 		<Button Name="button2" Content="DOWN" Click="Button2_Click"/>
-		<Button Content="test"/>
-		<Button Content="test"/>
-		<Button Content="test"/>
 
 		
 
-		<ListBox Name="explorerLB" KeyboardNavigation.TabNavigation="Cycle"
+		<ListBox Name="explorerLB" Height="200" KeyboardNavigation.TabNavigation="Cycle"
 			 Background="Black" Margin="50" Foreground="Wheat"
 			 BorderThickness="0" BorderBrush="Transparent"
-		 ScrollViewer.VerticalScrollBarVisibility="Visible"
-		  ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+		 >
 			<ListBox.ItemTemplate>
 				<DataTemplate>
 					<Border Margin="0,5" Background="AliceBlue" BorderBrush="Red" BorderThickness="2">

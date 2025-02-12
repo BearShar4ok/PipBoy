@@ -1,47 +1,57 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Device.Gpio;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ava.Classes
 {
     public class GpioService
     {
-        private readonly GpioController controller;
-        public event Action ButtonPressedPlus;
-        public event Action ButtonPressedMinus;
+        private static readonly Lazy<GpioService> _instance = new(() => new GpioService());
+        public static GpioService Instance => _instance.Value;
 
-        public GpioService()
+        private readonly GpioController controller;
+        private bool isInitialized = false;
+
+        public event Action? ButtonPressedPlus;
+        public event Action? ButtonPressedMinus;
+
+        private GpioService()
         {
             controller = new GpioController();
         }
 
         public void InitializeGpio()
         {
-            // Инициализация GPIO
+            if (isInitialized)
+            {
+                Console.WriteLine("GpioService уже инициализирован, повторный вызов игнорируется.");
+                return;
+            }
+
+            Console.WriteLine("Инициализация GPIO...");
+            isInitialized = true;
+
             controller.OpenPin(RasberryPINS.buttonPinY, PinMode.InputPullUp);
-            controller.RegisterCallbackForPinValueChangedEvent(RasberryPINS.buttonPinY,
-                PinEventTypes.Falling, ButtonPressedPlusHandler);
+            controller.RegisterCallbackForPinValueChangedEvent(RasberryPINS.buttonPinY, PinEventTypes.Falling, ButtonPressedPlusHandler);
 
             controller.OpenPin(RasberryPINS.buttonPinG, PinMode.InputPullUp);
-            controller.RegisterCallbackForPinValueChangedEvent(RasberryPINS.buttonPinG,
-                PinEventTypes.Falling, ButtonPressedMinusHandler);
+            controller.RegisterCallbackForPinValueChangedEvent(RasberryPINS.buttonPinG, PinEventTypes.Falling, ButtonPressedMinusHandler);
         }
 
-        private void ButtonPressedPlusHandler(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
+        private void ButtonPressedPlusHandler(object sender, PinValueChangedEventArgs args)
         {
+            Console.WriteLine("Нажата кнопка +");
             ButtonPressedPlus?.Invoke();
         }
 
-        private void ButtonPressedMinusHandler(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
+        private void ButtonPressedMinusHandler(object sender, PinValueChangedEventArgs args)
         {
+            Console.WriteLine("Нажата кнопка -");
             ButtonPressedMinus?.Invoke();
         }
 
         public void Cleanup()
         {
+            Console.WriteLine("Очистка GPIO...");
             controller.Dispose();
         }
     }
