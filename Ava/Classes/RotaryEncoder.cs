@@ -11,8 +11,8 @@ namespace Ava.Classes
 {
     public class RotaryEncoder : IDisposable
     {
-        public event Action<int>? RotatedRight; // Событие, передающее новую позицию
-        public event Action<int>? RotatedLeft; // Событие, передающее новую позицию
+        public event Action<int>? RotatedRight; 
+        public event Action<int>? RotatedLeft;
 
 
         private readonly int pinA;
@@ -27,14 +27,11 @@ namespace Ava.Classes
             this.pinB = pinB;
             controller = new GpioController();
 
-            // Открываем пины
             controller.OpenPin(pinA, PinMode.InputPullUp);
             controller.OpenPin(pinB, PinMode.InputPullUp);
 
-            // Читаем начальное состояние
             lastAState = controller.Read(pinA) == PinValue.High ? 1 : 0;
 
-            // Подписываемся на события
             controller.RegisterCallbackForPinValueChangedEvent(pinA, PinEventTypes.Falling | PinEventTypes.Rising, OnPinAChanged);
         }
 
@@ -48,12 +45,12 @@ namespace Ava.Classes
                 if (bState != aState)
                 {
                     Position++;  // Вращение вправо
-                    RotatedLeft?.Invoke(Position); // Вызываем событие
+                    RotatedLeft?.Invoke(Position); 
                 }
                 else
                 {
                     Position--;  // Вращение влево
-                    RotatedRight?.Invoke(Position); // Вызываем событие
+                    RotatedRight?.Invoke(Position); 
                 }
                
 

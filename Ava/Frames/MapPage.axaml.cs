@@ -15,12 +15,11 @@ public partial class MapPage : UserControl
 {
     private double _zoomFactor = 1.0;
     private readonly ScaleTransform _scaleTransform;
-    private readonly GpioService gpioService;
 
     public MapPage()
     {
         InitializeComponent();
-        gpioService = GpioService.Instance; // Используем общий сервис
+
 
         string exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         string imagePath = Path.Combine(exeDir, "Assets", "map.jpg");
@@ -46,21 +45,9 @@ public partial class MapPage : UserControl
         try
         {
             Console.WriteLine("MapPage загружен");
-
-            Loaded += (_, _) =>
-            {
-                gpioService.InitializeGpio();
-                Console.WriteLine("MapPage: подписка на GPIO");
-                gpioService.ButtonPressedPlus += ButtonPressedPlus;
-                gpioService.ButtonPressedMinus += ButtonPressedMinus;
-            };
-
-            Unloaded += (_, _) =>
-            {
-                Console.WriteLine("MapPage: отписка от GPIO");
-                gpioService.ButtonPressedPlus -= ButtonPressedPlus;
-                gpioService.ButtonPressedMinus -= ButtonPressedMinus;
-            };
+            Console.WriteLine("MapPage: подписка на GPIO");
+            RasberryPINS.ButtonPressedPlusMap += ButtonPressedPlus;
+            RasberryPINS.ButtonPressedMinusMap += ButtonPressedMinus;
 
             info.Content = "Контроллер активен";
         }

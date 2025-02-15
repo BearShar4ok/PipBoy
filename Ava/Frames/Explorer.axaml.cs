@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -12,13 +13,11 @@ namespace Ava;
 public partial class Explorer : UserControl
 {
     public ObservableCollection<string> Folders { get; set; }
-    private readonly GpioService gpioService;
 
     public Explorer()
     {
         InitializeComponent();
         Folders = new ObservableCollection<string>();
-        gpioService = GpioService.Instance; // Используем синглтон
 
         string exeDirectory = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "..", "..");
 
@@ -33,21 +32,9 @@ public partial class Explorer : UserControl
         try
         {
             Console.WriteLine("Explorer загружен");
-
-            Loaded += (_, _) =>
-            {
-                gpioService.InitializeGpio();
-                Console.WriteLine("Explorer: подписка на GPIO");
-                gpioService.ButtonPressedPlus += ButtonPressedPlus;
-                gpioService.ButtonPressedMinus += ButtonPressedMinus;
-            };
-
-            Unloaded += (_, _) =>
-            {
-                Console.WriteLine("Explorer: отписка от GPIO");
-                gpioService.ButtonPressedPlus -= ButtonPressedPlus;
-                gpioService.ButtonPressedMinus -= ButtonPressedMinus;
-            };
+            Console.WriteLine("Explorer: подписка на GPIO");
+            RasberryPINS.ButtonPressedPlusExplorer += ButtonPressedPlus;
+            RasberryPINS.ButtonPressedMinusExplorer += ButtonPressedMinus;
 
             exeDirectory = "/home/bearshark/Downloads/My_disk";
             LoadTest(exeDirectory);

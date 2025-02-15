@@ -29,19 +29,17 @@ namespace Ava
         private GpioController? controller = null;
         private RotaryEncoder? encoder = null;
         private Control currentPage;
+        private RasberryPINS? rasberryPINS = null;
 
-        private Control[] pages = new Control[] { new FirstPage("1"), new Explorer(), new MapPage(), new FirstPage("3"), new FirstPage("4"), new FirstPage("5") };
+        private Control[] pages;
         int pageIndex = 0;
 
-        int buttonPinY = 21; // GPIO 21
-        int buttonPinG = 19; // GPIO 19
-        int ledPinY = 20; // GPIO 20
-        int ledPinG = 16; // GPIO 16
+        public object FrameHOST { get { return FrameHost.Content; } }
+
         public MainWindow()
         {
             InitializeComponent();
 
-            // Проверяем, работает ли Avalonia Previewer
             if (Design.IsDesignMode)
             {
                 label.Content = "Design mode (Previewer)";
@@ -50,6 +48,10 @@ namespace Ava
 
             try
             {
+
+                rasberryPINS = new RasberryPINS(this);
+                rasberryPINS.InitializeGpio();
+                
                 controller = new GpioController();
                 encoder = new RotaryEncoder(13,6);
 
@@ -69,7 +71,7 @@ namespace Ava
                         SwitchPage(false);
                     });
                 };
-
+                pages = new Control[] { new FirstPage("1"), new Explorer(), new MapPage(), new FirstPage("3"), new FirstPage("4"), new FirstPage("5") };
                 Task.Run(MonitorButtons);
             }
             catch (Exception ex)
@@ -77,7 +79,7 @@ namespace Ava
                 Debug.WriteLine("Ошибка инициализации GPIO: " + ex.Message);
             }
 
-            currentPage = pages[0]; // Загружаем стартовую страницу
+            currentPage = pages[0]; 
             FrameHost.Content = currentPage;
         }
 
@@ -117,10 +119,11 @@ namespace Ava
 
             Dispatcher.UIThread.Post(() =>
             {
-                label.Content = (pageIndex + 1) + "/" + pages.Length;
+                
                 currentPage = pages[pageIndex];
                 FrameHost.Content = currentPage;
-            });
+                label.Content = (pageIndex + 1) + "/" + pages.Length;
+            }); 
         }
 
         public void Button1_Click(object source, RoutedEventArgs args)
