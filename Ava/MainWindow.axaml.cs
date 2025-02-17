@@ -76,6 +76,7 @@ namespace Ava
             }
             catch (Exception ex)
             {
+                pages = new Control[] { new FirstPage("1"), new Explorer(), new MapPage(), new FirstPage("3"), new FirstPage("4"), new FirstPage("5") };
                 Debug.WriteLine("Ошибка инициализации GPIO: " + ex.Message);
             }
 
