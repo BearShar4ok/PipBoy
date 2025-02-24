@@ -36,6 +36,7 @@ namespace Ava
 
         public object FrameHOST { get { return FrameHost.Content; } }
 
+
         public MainWindow()
         {
             InitializeComponent();
@@ -51,15 +52,15 @@ namespace Ava
 
                 rasberryPINS = new RasberryPINS(this);
                 rasberryPINS.InitializeGpio();
-                
+
                 controller = new GpioController();
-                encoder = new RotaryEncoder(13,6);
+                encoder = new RotaryEncoder(13, 6);
 
                 encoder.RotatedRight += (position) =>
                 {
                     Dispatcher.UIThread.Post(() =>
                     {
-                        infocode.Content = "Encoder state: "+ encoder.Position;
+                        infocode.Content = "Encoder state: " + encoder.Position;
                         SwitchPage(true);
                     });
                 };
@@ -71,16 +72,16 @@ namespace Ava
                         SwitchPage(false);
                     });
                 };
-                pages = new Control[] { new FirstPage("1"), new Explorer(), new MapPage(), new FirstPage("3"), new FirstPage("4"), new FirstPage("5") };
+                pages = new Control[] { new Explorer(), new MapPage(), new COMPort() };
                 Task.Run(MonitorButtons);
             }
             catch (Exception ex)
             {
-                pages = new Control[] { new FirstPage("1"), new Explorer(), new MapPage(), new FirstPage("3"), new FirstPage("4"), new FirstPage("5") };
+                pages = new Control[] { new Explorer(), new MapPage(), new COMPort() };
                 Debug.WriteLine("Ошибка инициализации GPIO: " + ex.Message);
             }
 
-            currentPage = pages[0]; 
+            currentPage = pages[pageIndex];
             FrameHost.Content = currentPage;
         }
 
@@ -120,11 +121,11 @@ namespace Ava
 
             Dispatcher.UIThread.Post(() =>
             {
-                
+
                 currentPage = pages[pageIndex];
                 FrameHost.Content = currentPage;
                 label.Content = (pageIndex + 1) + "/" + pages.Length;
-            }); 
+            });
         }
 
         public void Button1_Click(object source, RoutedEventArgs args)

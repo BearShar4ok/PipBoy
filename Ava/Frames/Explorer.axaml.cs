@@ -1,18 +1,21 @@
 using Ava.Classes;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Xml.Linq;
 using static System.Collections.Specialized.BitVector32;
 
@@ -107,10 +110,10 @@ public partial class Explorer : UserControl
                 }
 
                 var allFiles = Directory.GetFiles(disk).Select(Path.GetFileName).ToArray();
-                Debug.WriteLine("disk: " + disk);
-                Console.WriteLine("disk: " + disk);
-                Debug.WriteLine("allFiles: " + allFiles);
-                Console.WriteLine("allFiles: " + allFiles);
+                //Debug.WriteLine("disk: " + disk);
+                //Console.WriteLine("disk: " + disk);
+                //Debug.WriteLine("allFiles: " + allFiles);
+                //Console.WriteLine("allFiles: " + allFiles);
                 /*
                 if (ConfigManager.Config.IsFlashcardHack)
                 {
@@ -134,13 +137,13 @@ public partial class Explorer : UserControl
                 //string disksPath = Path.GetDirectoryName(disk);
                 string disksPath = disk;
 
-                Debug.WriteLine("disksPath: " + disksPath);
-                Console.WriteLine("disksPath: " + disksPath);
+                //Debug.WriteLine("disksPath: " + disksPath);
+                //Console.WriteLine("disksPath: " + disksPath);
 
                 if (Directory.Exists(disksPath))
                 {
-                    Debug.WriteLine("Exist");
-                    Console.WriteLine("Exist");
+                    //Debug.WriteLine("Exist");
+                    //Console.WriteLine("Exist");
                     //LblInfo.Content = "";
                     //LblInfo.Visibility = Visibility.Hidden;
 
@@ -154,8 +157,8 @@ public partial class Explorer : UserControl
                     {
                         if (disk.Contains(file))
                         {
-                            Console.WriteLine("return");
-                            Debug.WriteLine("return");
+                            //Console.WriteLine("return");
+                            //Debug.WriteLine("return");
                             return;
                         }
                     }
@@ -307,6 +310,10 @@ public partial class Explorer : UserControl
     }
     private void GoToFilePage(string directory)
     {
+        if (Path.GetExtension(directory).Remove(0, 1) == "txt")
+        {
+            
+        }
         //if (Addition.IsItPage(directory))
         //{
         //    var nextPage = Addition.GetPageByFilename(directory, _theme);
