@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Xml;
@@ -21,10 +22,10 @@ public partial class COMPort : UserControl
     private DateTime lastReadTime = DateTime.Now;
     private SerialPort serialPort;
 
-    private Dictionary<string, Dictionary<string, string>> allCommands = new Dictionary<string, Dictionary<string, string>>();
-    private Dictionary<string, string> devices = new Dictionary<string, string>();
+    private Dictionary<string, Dictionary<string, int>> allCommands = new Dictionary<string, Dictionary<string, int>>();
+    private Dictionary<int, string> devices = new Dictionary<int, string>();
     private string currentDevice = "";
-    private const string codeAuth = "#0000FFFF";
+    private const int codeAuth = 0x1F00FFFF;
     public COMPort()
     {
         InitializeComponent();
@@ -41,7 +42,6 @@ public partial class COMPort : UserControl
         string portName = "/dev/serial0";
         serialPort = new SerialPort(portName, 9600);
 
-
         //new Thread(TEst).Start();
         info.Content = "Loading...";
         //FindingDevice();
@@ -55,6 +55,8 @@ public partial class COMPort : UserControl
 
        
         serialPort.ReadTimeout = 3000;
+        serialPort.BaudRate = 9600;
+
         //serialPort.WriteTimeout = 1000;
         Console.WriteLine("serialPort.ReadTimeout: " + serialPort.ReadTimeout);
         Console.WriteLine("serialPort.WriteTimeout: " + serialPort.WriteTimeout);
@@ -63,41 +65,58 @@ public partial class COMPort : UserControl
             Console.ForegroundColor = ConsoleColor.Green;
             if (serialPort.IsOpen)
             {
-                serialPort.Close();
+                //serialPort.Close();
                 Console.WriteLine("Порт БЫЛ открыт. Закрыт...");
                 Debug.WriteLine("Порт БЫЛ открыт. Закрыт...");
             }
-            serialPort.Open();
-            Console.WriteLine("Порт открыт. Отправка данных...");
-            Debug.WriteLine("Порт открыт. Отправка данных...");
+            else
+            {
+                serialPort.Open();
+                Console.WriteLine("Порт открыт");
+                Debug.WriteLine("Порт открыт");
+            }
+            Console.WriteLine("Отправка данных...");
+            Debug.WriteLine("Отправка данных...");
 
-            Send(codeAuth);
+            Send(codeAuth.ToString());
             // Чтение данных от Arduino
             //while (true)
             //{
+            Console.WriteLine("Отправка данных ЗАВЕРШЕНА");
+            Debug.WriteLine("Отправка данных ЗАВЕРШЕНА");
             try
             {
                 string data = serialPort.ReadLine();
                 if (data == null || data.Length <= 1 || string.IsNullOrEmpty(data) || string.IsNullOrWhiteSpace(data))
                 {
                     info.Content = "Нет доступных устройств...";
+
+                    Console.WriteLine($"Нет доступных устройств...Получено от Arduino:{data}:");
+                    Debug.WriteLine($"Нет доступных устройств...Получено от Arduino:{data}:");
+
+
+                    Console.WriteLine("FindingDevice завершен в return if");
+                    Debug.WriteLine("FindingDevice завершен в return if");
                     return;
                 }
-                data = "#" + data;
+                int data2 = int.Parse(data);
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"Получено от Arduino: {data} :");
-                Debug.WriteLine($"Получено от Arduino: {data} :");
+                Console.WriteLine($"Получено от Arduino:{data}:");
+                Debug.WriteLine($"Получено от Arduino:{data}:");
                 Console.ResetColor();
 
-                if (devices.ContainsKey(data))
+                if (devices.ContainsKey(data2))
                 {
-                    currentDevice = devices[data];
+                    currentDevice = devices[data2];
                     info.Content = currentDevice;
                     LoadButtons();
                 }
                 else
                 {
-                    info.Content = "Устройство не поддерживается...   |" + data + "|";
+                    info.Content = "Устройство не поддерживается...   |" + data2 + "|";
+
+                    Console.WriteLine("FindingDevice завершен в return else");
+                    Debug.WriteLine("FindingDevice завершен в return else");
                     return;
                 }
             }
@@ -137,15 +156,25 @@ public partial class COMPort : UserControl
         //    Debug.WriteLine("Dispose");
         //    Console.ResetColor();
         //}
-
+        Console.WriteLine("FindingDevice завершен в конце");
+        Debug.WriteLine("FindingDevice завершен в конце");
     }
     private void Send(string text)
     {
-        Console.ForegroundColor = ConsoleColor.Green;
-        serialPort.WriteLine(text);
-        Console.WriteLine(text);
-        Debug.WriteLine(text);
-        Console.ResetColor();
+        try
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            serialPort.WriteLine(text);
+            Console.WriteLine(text);
+            Debug.WriteLine(text);
+            Console.ResetColor();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine("Ошибка в отправке: " + ex.Message);
+            Console.WriteLine("Ошибка в отправке: " + ex.Message);
+        }
+       
     }
     public void Button1_Click(object source, RoutedEventArgs args)
     {
@@ -158,6 +187,7 @@ public partial class COMPort : UserControl
         Console.WriteLine("Dispose");
         Debug.WriteLine("Dispose");
         Console.ResetColor();
+        
     }
     public void Button2_Click(object source, RoutedEventArgs args)
     {
@@ -181,7 +211,7 @@ public partial class COMPort : UserControl
             Field.Children.Add(b);
         }
     }
-    private (Dictionary<string, Dictionary<string, string>>, Dictionary<string, string>) ReadJsonFile()
+    private (Dictionary<string, Dictionary<string, int>>, Dictionary<int, string>) ReadJsonFile()
     {
         string exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         string filePath = Path.Combine(exeDir, "Assets", "commands.json");
@@ -192,9 +222,10 @@ public partial class COMPort : UserControl
         string json = File.ReadAllText(filePath);
         var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
 
-        var devices = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(data["devices"].ToString());
+        var devices = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, int>>>(data["devices"].ToString());
         var settings = JsonConvert.DeserializeObject<Dictionary<string, string>>(data["settings"].ToString());
+        var settingsLast = settings.ToDictionary(k=> Convert.ToInt32(k.Key,16), k=> k.Value);
 
-        return (devices, settings);
+        return (devices, settingsLast);
     }
 }
