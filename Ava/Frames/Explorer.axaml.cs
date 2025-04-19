@@ -26,7 +26,7 @@ public partial class Explorer : UserControl
     public ObservableCollection<string> Folders { get; set; }
     private Dictionary<string, ListBoxItem> _disks = new Dictionary<string, ListBoxItem>();
     private List<string> prohibited = new List<string>() { "/run", "/boot", "/sys", "/dev", "/proc" };
-    List<string> availableDiskName = new List<string>() { "A", "B", "C", "D", "E", "F", "G", "H", "K", "L", "M", "N", "R" };
+    List<string> availableDiskName = new List<string>() { "A", "B", "D", "E", "F", "G", "H", "K", "L", "M", "N", "R" };//, "C"
     private bool _isKeyPressed = false;
     private int _deepOfPath;
     private const string PrevDirText = "..";
@@ -48,7 +48,6 @@ public partial class Explorer : UserControl
         {
             info.Content = "Design mode (Previewer)";
             exeDirectory = Path.Combine(exeDirectory, "..");
-            // LoadTest(exeDirectory);
             return;
         }
 
@@ -61,13 +60,11 @@ public partial class Explorer : UserControl
             RasberryPINS.ButtonPressedPressExplorer += ButtonPressedPress;
 
             exeDirectory = "/home/bearshark/Downloads/My_disk";
-            //LoadTest(exeDirectory);
             info.Content = "Контроллер активен";
         }
         catch (Exception ex)
         {
             exeDirectory = Path.Combine(exeDirectory, "..");
-            //LoadTest(exeDirectory);
             info.Content = "Ошибка GPIO: " + ex.Message;
         }
         DevicesManager.StartListening();
@@ -95,6 +92,11 @@ public partial class Explorer : UserControl
         {
             try
             {
+                //
+                if (disk == "/")
+                    disk = "/mydisk";
+                //
+
                 if (!addToList)
                 {
                     Debug.WriteLine("In addToList");
@@ -111,7 +113,7 @@ public partial class Explorer : UserControl
 
                 var allFiles = Directory.GetFiles(disk).Select(Path.GetFileName).ToArray();
                 //Debug.WriteLine("disk: " + disk);
-                //Console.WriteLine("disk: " + disk);
+                Console.WriteLine("disk: " + disk);
                 //Debug.WriteLine("allFiles: " + allFiles);
                 //Console.WriteLine("allFiles: " + allFiles);
                 /*
@@ -162,16 +164,25 @@ public partial class Explorer : UserControl
                             return;
                         }
                     }
-                    //Console.WriteLine(1);                                  //
-                    Random r = new Random();                               //
-                    //Console.WriteLine(2);                                  //
-                    int index = r.Next(0, availableDiskName.Count);        //
-                    //Console.WriteLine(3);                                  // I cant delete Console.WriteLine
-                    string str = availableDiskName[index];                 //  because it stops working((((
-                                                                           // Console.WriteLine(4);                                  //
-                    availableDiskName.RemoveAt(index);                     //  I dont know why
-                    //Console.WriteLine(5);                                  //
-                    var diskName = str + ":/";                            //
+                    string diskName;
+                    if (disk != "/mydisk")
+                    {
+                        //Console.WriteLine(1);                                  //
+                        Random r = new Random();                               //
+                                                                               //Console.WriteLine(2);                                  //
+                        int index = r.Next(0, availableDiskName.Count);        //
+                                                                               //Console.WriteLine(3);                                  // I cant delete Console.WriteLine
+                        string str = availableDiskName[index];                 //  because it stops working((((
+                                                                               // Console.WriteLine(4);                                  //
+                        availableDiskName.RemoveAt(index);                     //  I dont know why
+                                                                               //Console.WriteLine(5);                                  //
+                        diskName = str + ":/";                            //
+                    }
+                    else
+                    {
+                        diskName= "C:/";
+                    }
+                    
 
 
                     Debug.WriteLine("diskName: " + diskName);

@@ -6,9 +6,12 @@
              x:Class="Ava.COMPort">
 	<StackPanel x:Name="Field">
 		<Label Name="info" Content="Loading..."/>
+		<Label Name="encoderInfo" Content="0"/>
 		<Button Name="button1" Content="Disconect" Click="Button1_Click"/>
-		<Button Name="button2" Content="Connect" Click="Button2_Click"/>
 		<Button Name="button3" Content="Connect" Click="Button3_Click"/>
 		<Border Background="Black" Width="800" Height="5"/>
+		<StackPanel x:Name="Buttons">
+			
+		</StackPanel>
 	</StackPanel>
 </UserControl>

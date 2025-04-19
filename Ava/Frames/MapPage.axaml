@@ -5,18 +5,19 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="480"
              x:Class="Ava.MapPage">
 	<UserControl.Resources>
-		<ScaleTransform x:Key="MapScaleTransform" ScaleX="1" ScaleY="1"/>
+		<TransformGroup x:Key="MapTransformGroup">
+			<ScaleTransform  ScaleX="1" ScaleY="1"/>
+			<TranslateTransform  X="0" Y="0"/>
+		</TransformGroup>
 	</UserControl.Resources>
 	<StackPanel Orientation="Vertical" HorizontalAlignment="Left">
-		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="1">
+		<StackPanel Name="TopPanel" Orientation="Horizontal" HorizontalAlignment="Center" Margin="1">
 			<Label Name="info" Content="ttt" BorderThickness="1" BorderBrush="Black" />
-			<Label Name="infoB1" Content="1 no" BorderThickness="1" BorderBrush="Black" />
-			<Label Name="infoB2" Content="2 no" BorderThickness="1" BorderBrush="Black" />
 		</StackPanel>
 		<Image Name="MapImage"  HorizontalAlignment="Stretch"
-				   VerticalAlignment="Stretch"
-                   RenderTransform="{StaticResource MapScaleTransform}"
-                   RenderTransformOrigin="0.5,0.5"/>
+					RenderTransform="{StaticResource MapTransformGroup}"
+					RenderTransformOrigin="0.5,0.5"
+				   VerticalAlignment="Stretch"/>
 
 		<!-- Кнопки управления зумом -->
 		<!-- mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="480" -->

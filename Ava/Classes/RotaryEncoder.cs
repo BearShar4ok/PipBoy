@@ -19,6 +19,7 @@ namespace Ava.Classes
         private readonly int pinB;
         private readonly GpioController controller;
         private int lastAState;
+        private int eventCounter = 0;
         public int Position { get; private set; } = 0;
 
         public RotaryEncoder(int pinA, int pinB)
@@ -42,19 +43,24 @@ namespace Ava.Classes
 
             if (aState != lastAState)
             {
-                if (bState != aState)
+                if(eventCounter == 10000) 
+                    eventCounter = 0;
+                eventCounter++;
+                if (eventCounter % 2 == 0)
                 {
-                    Position++;  // Вращение вправо
-                    RotatedLeft?.Invoke(Position); 
-                }
-                else
-                {
-                    Position--;  // Вращение влево
-                    RotatedRight?.Invoke(Position); 
-                }
-               
+                    if (bState != aState)
+                    {
+                        Position++;  // Вращение вправо
+                        RotatedLeft?.Invoke(Position);
+                    }
+                    else
+                    {
+                        Position--;  // Вращение влево
+                        RotatedRight?.Invoke(Position);
+                    }
 
-                Console.WriteLine($"Position: {Position}");
+                    Console.WriteLine($"Position: {Position}");
+                }
             }
 
             lastAState = aState;

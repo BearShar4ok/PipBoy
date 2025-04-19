@@ -27,7 +27,6 @@ namespace Ava
         private ScaleTransform _scaleTransform;
 
         private GpioController? controller = null;
-        private RotaryEncoder? encoder = null;
         private Control currentPage;
         private RasberryPINS? rasberryPINS = null;
 
@@ -54,26 +53,26 @@ namespace Ava
                 rasberryPINS.InitializeGpio();
 
                 controller = new GpioController();
-                encoder = new RotaryEncoder(13, 6);
 
-                encoder.RotatedRight += (position) =>
+
+                rasberryPINS.encoderMain.RotatedRight += (position) =>
                 {
                     Dispatcher.UIThread.Post(() =>
                     {
-                        infocode.Content = "Encoder state: " + encoder.Position;
+                        infocode.Content = "Encoder state: " + rasberryPINS.encoderMain.Position;
                         SwitchPage(true);
                     });
                 };
-                encoder.RotatedLeft += (position) =>
+                rasberryPINS.encoderMain.RotatedLeft += (position) =>
                 {
                     Dispatcher.UIThread.Post(() =>
                     {
-                        infocode.Content = "Encoder state: " + encoder.Position;
+                        infocode.Content = "Encoder state: " + rasberryPINS.encoderMain.Position;
                         SwitchPage(false);
                     });
                 };
                 pages = new Control[] { new Explorer(), new MapPage(), new COMPort() };
-                Task.Run(MonitorButtons);
+                //Task.Run(MonitorButtons);
             }
             catch (Exception ex)
             {
@@ -87,6 +86,7 @@ namespace Ava
 
         private void MonitorButtons()
         {
+            /*
             controller.OpenPin(RasberryPINS.buttonPinB, PinMode.InputPullUp);
             controller.OpenPin(RasberryPINS.buttonPinO, PinMode.InputPullUp);
 
@@ -106,6 +106,7 @@ namespace Ava
 
                 Thread.Sleep(50); // Снижаем нагрузку на процессор
             }
+            */
         }
 
         private void SwitchPage(bool isUp)
