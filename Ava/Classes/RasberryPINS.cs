@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 namespace Ava.Classes
 {
     internal class RasberryPINS
-    {  
+    {
         public const int buttonPinEncoder = 22;
 
         private GpioController? controller;
         private MainWindow MW;
+        private FileSystem FS;
 
         private RotaryEncoder encoderSecond = new RotaryEncoder(17, 27);
         public readonly RotaryEncoder encoderMain = new RotaryEncoder(13, 6);
@@ -33,9 +34,13 @@ namespace Ava.Classes
         public static event Action ButtonPressedPressExplorer;
         public static event Action ButtonPressedPressCOMPort;
 
-        public RasberryPINS(MainWindow mw)
+        public static event Action ButtonPressedPressTextPage;
+        public static event Action ButtonPressedPressImagePage;
+
+        public RasberryPINS(MainWindow mw, FileSystem fs)
         {
             MW = mw;
+            FS = fs;
         }
 
         public void InitializeGpio()
@@ -81,10 +86,14 @@ namespace Ava.Classes
 
         private void HandleRotateRight()
         {
-            Console.WriteLine(MW.FrameHOST);
-            if (MW.FrameHOST is Explorer)
+            Console.WriteLine("WS " + MW.FrameHOST);
+            Console.WriteLine("FS " + FS.FrameHOST);
+            if (MW.FrameHOST is FileSystem)
             {
-                ButtonPressedPlusExplorer?.Invoke();
+                if (FS.FrameHOST is Explorer)
+                {
+                    ButtonPressedPlusExplorer?.Invoke();
+                }
             }
             else if (MW.FrameHOST is MapPage)
             {
@@ -98,10 +107,14 @@ namespace Ava.Classes
 
         private void HandleRotateLeft()
         {
-            Console.WriteLine(MW.FrameHOST);
-            if (MW.FrameHOST is Explorer)
+            Console.WriteLine("WS " + MW.FrameHOST);
+            Console.WriteLine("FS " + FS.FrameHOST);
+            if (MW.FrameHOST is FileSystem)
             {
-                ButtonPressedMinusExplorer?.Invoke();
+                if (FS.FrameHOST is Explorer)
+                {
+                    ButtonPressedMinusExplorer?.Invoke();
+                }
             }
             else if (MW.FrameHOST is MapPage)
             {
@@ -115,10 +128,22 @@ namespace Ava.Classes
 
         private void HandleButtonRotate()
         {
-            Console.WriteLine(MW.FrameHOST);
-            if (MW.FrameHOST is Explorer)
+            Console.WriteLine("WS " + MW.FrameHOST);
+            Console.WriteLine("FS " + FS.FrameHOST);
+            if (MW.FrameHOST is FileSystem)
             {
-                ButtonPressedPressExplorer?.Invoke();
+                if (FS.FrameHOST is Explorer)
+                {
+                    ButtonPressedPressExplorer?.Invoke();
+                }
+                else if (FS.FrameHOST is TextPage)
+                {
+                    ButtonPressedPressTextPage?.Invoke();
+                }
+                else if (FS.FrameHOST is ImagePage)
+                {
+                    ButtonPressedPressImagePage?.Invoke();
+                }
             }
             else if (MW.FrameHOST is MapPage)
             {

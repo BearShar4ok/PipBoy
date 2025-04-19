@@ -16,6 +16,7 @@ using Avalonia.Threading;
 using System.Threading.Tasks;
 using Ava.Classes;
 using Avalonia.Interactivity;
+using Microsoft.VisualBasic.FileIO;
 
 
 
@@ -33,6 +34,8 @@ namespace Ava
         private Control[] pages;
         int pageIndex = 0;
 
+        private FileSystem fileSystem;
+
         public object FrameHOST { get { return FrameHost.Content; } }
 
 
@@ -48,8 +51,8 @@ namespace Ava
 
             try
             {
-
-                rasberryPINS = new RasberryPINS(this);
+                fileSystem=  new FileSystem();
+                rasberryPINS = new RasberryPINS(this, fileSystem);
                 rasberryPINS.InitializeGpio();
 
                 controller = new GpioController();
@@ -71,12 +74,12 @@ namespace Ava
                         SwitchPage(false);
                     });
                 };
-                pages = new Control[] { new Explorer(), new MapPage(), new COMPort() };
+                pages = new Control[] { fileSystem, new MapPage(), new COMPort() };
                 //Task.Run(MonitorButtons);
             }
             catch (Exception ex)
             {
-                pages = new Control[] { new Explorer(), new MapPage(), new COMPort() };
+                pages = new Control[] { fileSystem, new MapPage(), new COMPort() };
                 Debug.WriteLine("Ошибка инициализации GPIO: " + ex.Message);
             }
 

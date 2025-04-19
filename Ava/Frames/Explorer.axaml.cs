@@ -33,6 +33,7 @@ public partial class Explorer : UserControl
     private string _currDisk;
     private int _selectedIndex;
     private string dirNow;
+    public event Action<string, string>? FileOpened;
 
     public Explorer()
     {
@@ -323,7 +324,11 @@ public partial class Explorer : UserControl
     {
         if (Path.GetExtension(directory).Remove(0, 1) == "txt")
         {
-            
+            FileOpened?.Invoke("txt", directory);
+        }
+        else if (Path.GetExtension(directory).Remove(0, 1) == "png")
+        {
+            FileOpened?.Invoke("png", directory);
         }
         //if (Addition.IsItPage(directory))
         //{
@@ -365,7 +370,7 @@ public partial class Explorer : UserControl
             var lbi = new ListBoxItem()
             {
                 Content = name,
-                Tag = $@"{directory}\{filename}",
+                Tag = Path.Combine(directory, filename)// $@"{directory}/{filename}",
                 // Style = (Style)App.Current.FindResource("ImageText"),
                 //Foreground = (Brush)new BrushConverter().ConvertFrom(ConfigManager.Config.TerminalColor),
                 // FontFamily = LblInfo.FontFamily,
@@ -502,8 +507,6 @@ public partial class Explorer : UserControl
         //{
         try
         {
-
-
             var lbi = (ListBoxItem)explorerLB.SelectedItem;
             if (lbi == null)
                 return;
